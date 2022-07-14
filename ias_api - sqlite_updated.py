@@ -18,6 +18,7 @@ cursor = conn.cursor()
 ### creating tables
 cursor.execute("""CREATE TABLE inventoryList (
 	itemName text NOT NULL , 
+    itemCategory text NULL,
 	quantity integer NULL,
     entryDate Date NULL,
     expiryDate Date NOT NULL,
@@ -47,6 +48,7 @@ class InventoryList(Resource):
         parser.add_argument('quantity', required=True)
         entryDate = str(date.today())
         parser.add_argument('expiryDate', required=True)
+        parser.add_argument('itemCategory', required=True)    
         args = parser.parse_args()  
 
         # read data
@@ -66,8 +68,8 @@ class InventoryList(Resource):
             
             # add the newly provided values
             
-            cursor.execute("INSERT INTO inventoryList VALUES (:itemName, :quantity, :entryDate, :expiryDate) ",  
-                            {'itemName':args['itemName'], 'quantity':args['quantity'], 'entryDate':entryDate, 'expiryDate':args['expiryDate']} )
+            cursor.execute("INSERT INTO inventoryList VALUES (:itemName, :quantity, :entryDate, :expiryDate, :itemCategory) ",  
+                            {'itemName':args['itemName'], 'quantity':args['quantity'], 'entryDate':entryDate, 'expiryDate':args['expiryDate'], 'itemCategory':args['itemCategory']} )
             conn.commit()
             return {'data': new_data.to_dict()}, 200  # return data with 200 OK
 
