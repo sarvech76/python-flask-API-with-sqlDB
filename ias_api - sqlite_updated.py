@@ -75,6 +75,8 @@ class InventoryList(Resource):
         parser = reqparse.RequestParser()  
         parser.add_argument('itemName', required=True)  
         parser.add_argument('quantity', required=True)
+        parser.add_argument('newExpiryDate', required=True)
+        parser.add_argument('oldExpiryDate', required=True)
         args = parser.parse_args()  
 
         # read data
@@ -82,7 +84,8 @@ class InventoryList(Resource):
         data = pd.read_sql(query,conn) 
         
         if args['itemName'] in list(data['itemName']):
-            cursor.execute("UPDATE inventoryList SET quantity = :quantity WHERE itemName = :itemName ", {'itemName':args['itemName'], 'quantity':args['quantity']})
+            cursor.execute("UPDATE inventoryList SET quantity = :quantity, expiryDate = :newExpiryDate WHERE itemName = :itemName and expiryDate = :oldExpiryDate", 
+                                            {'itemName':args['itemName'], 'quantity':args['quantity'], 'newExpiryDate':args['newExpiryDate'], 'oldExpiryDate':args['oldExpiryDate']})
             conn.commit()
               
             # create new dataframe containing new values
@@ -101,6 +104,7 @@ class InventoryList(Resource):
     def delete(self):
         parser = reqparse.RequestParser()  
         parser.add_argument('itemName', required=True)  
+        parser.add_argument('expiryDate', required=True)  
         args = parser.parse_args()  
 
         # read data
@@ -109,7 +113,7 @@ class InventoryList(Resource):
                 
         if args['itemName'] in list(data['itemName']):
             # remove data entry matching given itemName
-            cursor.execute("DELETE FROM inventoryList WHERE itemName = (:itemName)", {'itemName':args['itemName']})
+            cursor.execute("DELETE FROM inventoryList WHERE itemName = :itemName and expiryDate = :expiryDate", {'itemName':args['itemName'], 'expiryDate':args['expiryDate']})
             conn.commit()
 
             # return data and 200 OK
